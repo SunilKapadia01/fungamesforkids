@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🧠 Body Parts Quiz for Kids 🦴</title>
+  <style>
+    body {
+      font-family: 'Comic Sans MS', cursive, sans-serif;
+      background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+      color: white;
+      text-align: center;
+      padding: 20px;
+      margin: 0;
+      min-height: 100vh;
+    }
+    h1 {
+      font-size: 2.2em;
+      text-shadow: 2px 2px 8px rgba(0,0,0,0.3);
+    }
+    p {
+      font-size: 18px;
+    }
+    .quiz-container {
+      max-width: 600px;
+      margin: 20px auto;
+      background: rgba(255, 255, 255, 0.15);
+      padding: 25px;
+      border-radius: 20px;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+    }
+    .question {
+      font-size: 22px;
+      margin-bottom: 15px;
+      min-height: 60px;
+      line-height: 1.4;
+    }
+    .timer {
+      font-size: 18px;
+      color: #FFD700;
+      font-weight: bold;
+      margin-bottom: 15px;
+    }
+    .options {
+      display: grid;
+      gap: 12px;
+      margin-bottom: 15px;
+    }
+    button.option-btn {
+      padding: 16px;
+      font-size: 18px;
+      border: none;
+      border-radius: 15px;
+      cursor: pointer;
+      background: rgba(255, 255, 255, 0.2);
+      color: white;
+      transition: all 0.2s ease;
+    }
+    button.option-btn:hover {
+      background: rgba(255, 255, 255, 0.4);
+    }
+    .feedback {
+      font-size: 20px;
+      margin: 10px 0;
+      min-height: 24px;
+      font-weight: bold;
+    }
+    .stats {
+      font-size: 18px;
+      color: #fff;
+      margin-top: 10px;
+    }
+    .next-btn {
+      padding: 12px 25px;
+      font-size: 18px;
+      background: #FFD700;
+      color: #333;
+      border: none;
+      border-radius: 15px;
+      cursor: pointer;
+      font-weight: bold;
+      margin-top: 10px;
+    }
+    .tap-instruction {
+      background: #FFECB3;
+      color: #D84315;
+      padding: 12px;
+      border-radius: 12px;
+      margin: 15px auto;
+      max-width: 90%;
+      font-size: 16px;
+      display: inline-block;
+    }
+    .final-summary {
+      background: rgba(0,0,0,0.3);
+      padding: 20px;
+      border-radius: 15px;
+      margin-top: 20px;
+      font-size: 19px;
+      line-height: 1.6;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>🧠 Body Parts Quiz for Kids 🦴</h1>
+  <p>Guess which body part does the job — fun & safe for ages 5-10!</p>
+
+  <!-- Sound Unlock -->
+  <button class="tap-instruction" id="unlock-sound">🔊 Tap to unlock sounds!</button>
+
+  <div class="quiz-container">
+    <div class="question" id="question">Loading...</div>
+    <div class="timer" id="timer">Time: 15s</div>
+    <div class="options" id="options"></div>
+    <div class="feedback" id="feedback"></div>
+    <div class="stats" id="stats"></div>
+    <button class="next-btn" id="next-btn">Next Question ➡️</button>
+  </div>
+
+  <div class="final-summary" id="summary" style="display:none;">
+    <h2>🎉 Quiz Complete!</h2>
+    <p><strong>Questions Answered:</strong> <span id="total-count">0</span></p>
+    <p><strong>Correct:</strong> <span id="correct-count">0</span></p>
+    <p><strong>Wrong:</strong> <span id="wrong-count">0</span></p>
+    <p><strong>Total Time:</strong> <span id="total-time">0</span> seconds</p>
+    <p><strong>Average Time per Question:</strong> <span id="avg-time">0</span> seconds</p>
+  </div>
+
+  <!-- Sound Effects -->
+  <audio id="correctSound" src="https://www.soundjay.com/buttons/sounds/button-08.mp3"></audio>
+  <audio id="wrongSound" src="https://www.soundjay.com/buttons/sounds/button-06.mp3"></audio>
+
+  <script>
+    // === 100 Kid-Safe Body Parts Questions ===
+    const bodyParts = [
+      { question: "Which part helps you see rainbows?", correct: "Eyes", options: ["Ears", "Eyes", "Nose", "Tongue"] },
+      { question: "Which organ pumps blood through your body?", correct: "Heart", options: ["Lungs", "Brain", "Heart", "Stomach"] },
+      { question: "Which part helps you smell cookies baking?", correct: "Nose", options: ["Mouth", "Ears", "Nose", "Hair"] },
+      { question: "What do you use to taste ice cream?", correct: "Tongue", options: ["Teeth", "Lips", "Tongue", "Nose"] },
+      { question: "Which bone protects your brain?", correct: "Skull", options: ["Spine", "Ribs", "Femur", "Skull"] },
+      { question: "Which part carries messages from brain to body?", correct: "Spinal Cord", options: ["Liver", "Spinal Cord", "Teeth", "Bladder"] },
+      { question: "Which organ cleans your blood and helps digest food?", correct: "Liver", options: ["Kidneys", "Lungs", "Liver", "Heart"] },
+      { question: "Which part helps you balance when you dance?", correct: "Ears", options: ["Eyes", "Ears", "Feet", "Hair"] },
+      { question: "Which bone is the longest in your body?", correct: "Femur", options: ["Humerus", "Femur", "Radius", "Skull"] },
+      { question: "Which organ helps you breathe in air?", correct: "Lungs", options: ["Heart", "Stomach", "Lungs", "Brain"] },
+      { question: "Which part helps you chew food?", correct: "Teeth", options: ["Tongue", "Lips", "Teeth", "Nose"] },
+      { question: "Which part connects your head to your body?", correct: "Neck", options: ["Shoulder", "Back", "Neck", "Chest"] },
+      { question: "Which organ helps you think and dream?", correct: "Brain", options: ["Heart", "Liver", "Lungs", "Brain"] },
+      { question: "Which part stores pee before you go to the bathroom?", correct: "Bladder", options: ["Stomach", "Bladder", "Kidneys", "Liver"] },
+      { question: "Which part helps you run and jump?", correct: "Legs", options: ["Arms", "Legs", "Hands", "Eyes"] },
+      { question: "Which part helps you give a hug?", correct: "Arms", options: ["Legs", "Feet", "Arms", "Hair"] },
+      { question: "Which organ removes waste from your blood?", correct: "Kidneys", options: ["Bladder", "Liver", "Kidneys", "Heart"] },
+      { question: "Which part helps you wave hello?", correct: "Hand", options: ["Foot", "Knee", "Hand", "Elbow"] },
+      { question: "Which bone protects your heart and lungs?", correct: "Ribs", options: ["Spine", "Pelvis", "Ribs", "Skull"] },
+      { question: "Which part helps you bend your arm?", correct: "Elbow", options: ["Knee", "Neck", "Elbow", "Ankle"] },
+      { question: "Which organ digests food after you eat?", correct: "Stomach", options: ["Liver", "Heart", "Stomach", "Lungs"] },
+      { question: "Which part grows on your head to keep it warm?", correct: "Hair", options: ["Skin", "Hair", "Teeth", "Nails"] },
+      { question: "Which part helps you hear your favorite song?", correct: "Ears", options: ["Eyes", "Mouth", "Ears", "Nose"] },
+      { question: "Which part helps you write with a pencil?", correct: "Fingers", options: ["Toes", "Fingers", "Knees", "Eyes"] },
+      { question: "Which organ takes oxygen from air and puts it in your blood?", correct: "Lungs", options: ["Heart", "Lungs", "Brain", "Liver"] },
+      { question: "Which part helps you stand up straight?", correct: "Spine", options: ["Ribs", "Spine", "Skull", "Pelvis"] },
+      { question: "Which part helps you kick a soccer ball?", correct: "Foot", options: ["Hand", "Knee", "Foot", "Arm"] },
+      { question: "Which organ controls your body like a computer?", correct: "Brain", options: ["Heart", "Liver", "Brain", "Stomach"] },
+      { question: "Which part helps you wiggle when you're happy?", correct: "Toes", options: ["Hair", "Teeth", "Toes", "Eyes"] },
+      { question: "Which bone is in your lower leg?", correct: "Tibia", options: ["Femur", "Humerus", "Tibia", "Skull"] },
+      { question: "Which part helps you swallow food?", correct: "Throat", options: ["Nose", "Throat", "Lungs", "Liver"] },
+      { question: "Which organ stores bile for digestion?", correct: "Gallbladder", options: ["Bladder", "Gallbladder", "Kidney", "Stomach"] },
+      { question: "Which part helps you blink?", correct: "Eyes", options: ["Ears", "Eyes", "Mouth", "Nose"] },
+      { question: "Which bone is in your shoulder?", correct: "Clavicle", options: ["Femur", "Radius", "Clavicle", "Patella"] },
+      { question: "Which part helps you frown or smile?", correct: "Mouth", options: ["Hair", "Ears", "Mouth", "Neck"] },
+      { question: "Which organ filters toxins from your blood?", correct: "Liver", options: ["Heart", "Lungs", "Kidneys", "Liver"] },
+      { question: "Which part helps you nod 'yes'?", correct: "Neck", options: ["Back", "Neck", "Knee", "Ankle"] },
+      { question: "Which part helps you feel something soft?", correct: "Skin", options: ["Hair", "Teeth", "Skin", "Bones"] },
+      { question: "Which organ helps you remember your name?", correct: "Brain", options: ["Heart", "Lungs", "Liver", "Brain"] },
+      { question: "Which part helps you stretch your arms wide?", correct: "Muscles", options: ["Bones", "Muscles", "Teeth", "Hair"] },
+      { question: "Which part helps you blow bubbles?", correct: "Mouth", options: ["Nose", "Ears", "Mouth", "Hair"] },
+      { question: "Which organ helps you stay warm?", correct: "Skin", options: ["Lungs", "Heart", "Skin", "Teeth"] },
+      { question: "Which part helps you point at the sky?", correct: "Finger", options: ["Toe", "Ear", "Finger", "Knee"] },
+      { question: "Which part helps you jump rope?", correct: "Legs", options: ["Arms", "Legs", "Eyes", "Hair"] },
+      { question: "Which organ helps you feel hungry?", correct: "Stomach", options: ["Heart", "Lungs", "Stomach", "Brain"] },
+      { question: "Which part helps you scratch your head?", correct: "Hand", options: ["Foot", "Hand", "Mouth", "Knee"] },
+      { question: "Which bone protects your spinal cord?", correct: "Spine", options: ["Ribs", "Skull", "Spine", "Pelvis"] },
+      { question: "Which part helps you clap your hands?", correct: "Fingers", options: ["Toes", "Fingers", "Ears", "Hair"] },
+      { question: "Which organ helps you cough?", correct: "Lungs", options: ["Heart", "Lungs", "Liver", "Kidneys"] },
+      { question: "Which part helps you wiggle your ears?", correct: "Muscles", options: ["Bones", "Muscles", "Teeth", "Hair"] },
+      { question: "Which part helps you hold a toy?", correct: "Hands", options: ["Feet", "Hands", "Knees", "Elbows"] },
+      { question: "Which organ helps you feel excited?", correct: "Heart", options: ["Lungs", "Heart", "Liver", "Brain"] },
+      { question: "Which part helps you walk on tiptoes?", correct: "Toes", options: ["Fingers", "Heels", "Toes", "Knees"] },
+      { question: "Which bone is in your knee?", correct: "Patella", options: ["Femur", "Tibia", "Fibula", "Patella"] },
+      { question: "Which part helps you sneeze?", correct: "Nose", options: ["Mouth", "Ears", "Nose", "Hair"] },
+      { question: "Which organ helps you dream at night?", correct: "Brain", options: ["Heart", "Lungs", "Liver", "Brain"] },
+      { question: "Which part helps you stomp your foot?", correct: "Foot", options: ["Hand", "Foot", "Knee", "Elbow"] },
+      { question: "Which organ helps you clean your blood?", correct: "Liver", options: ["Heart", "Lungs", "Kidneys", "Liver"] },
+      { question: "Which part helps you give a high-five?", correct: "Hand", options: ["Foot", "Hand", "Head", "Knee"] },
+      { question: "Which part helps you bend over?", correct: "Back", options: ["Neck", "Back", "Hair", "Ears"] },
+      { question: "Which organ helps you take in oxygen?", correct: "Lungs", options: ["Heart", "Lungs", "Stomach", "Brain"] },
+      { question: "Which part helps you wink?", correct: "Eye", options: ["Mouth", "Eye", "Nose", "Ear"] },
+      { question: "Which bone is in your upper arm?", correct: "Humerus", options: ["Femur", "Radius", "Humerus", "Tibia"] },
+      { question: "Which part helps you listen to a story?", correct: "Ears", options: ["Eyes", "Ears", "Mouth", "Hair"] },
+      { question: "Which organ helps you feel full after eating?", correct: "Stomach", options: ["Heart", "Lungs", "Stomach", "Liver"] },
+      { question: "Which part helps you crawl as a baby?", correct: "Arms and Legs", options: ["Eyes and Ears", "Arms and Legs", "Hair and Skin", "Teeth and Tongue"] },
+      { question: "Which organ helps you stay awake?", correct: "Brain", options: ["Heart", "Lungs", "Brain", "Liver"] },
+      { question: "Which part helps you tie your shoes?", correct: "Hands", options: ["Feet", "Hands", "Mouth", "Ears"] },
+      { question: "Which bone protects your lungs?", correct: "Ribs", options: ["Skull", "Ribs", "Femur", "Spine"] },
+      { question: "Which part helps you blow out birthday candles?", correct: "Mouth", options: ["Nose", "Ears", "Mouth", "Hair"] },
+      { question: "Which organ helps you digest sugar?", correct: "Liver", options: ["Heart", "Lungs", "Liver", "Kidneys"] },
+      { question: "Which part helps you dance?", correct: "Legs", options: ["Arms", "Legs", "Eyes", "Hair"] },
+      { question: "Which organ sends messages to your muscles?", correct: "Brain", options: ["Heart", "Lungs", "Liver", "Brain"] },
+      { question: "Which part helps you scratch an itch?", correct: "Hand", options: ["Foot", "Hand", "Mouth", "Knee"] },
+      { question: "Which part helps you swallow?", correct: "Throat", options: ["Lungs", "Teeth", "Throat", "Nose"] },
+      { question: "Which part helps you draw a picture?", correct: "Hands", options: ["Feet", "Hands", "Eyes", "Ears"] },
+      { question: "Which bone is in your foot?", correct: "Phalanges", options: ["Femur", "Tibia", "Humerus", "Phalanges"] },
+      { question: "Which organ helps you feel sleepy?", correct: "Brain", options: ["Heart", "Lungs", "Liver", "Brain"] },
+      { question: "Which part helps you jump up and down?", correct: "Legs", options: ["Arms", "Legs", "Eyes", "Hair"] },
+      { question: "Which part helps you taste sour lemon?", correct: "Tongue", options: ["Nose", "Tongue", "Fingers", "Lips"] },
+      { question: "Which organ pumps blood to your legs?", correct: "Heart", options: ["Lungs", "Heart", "Brain", "Liver"] },
+      { question: "Which part helps you wave goodbye?", correct: "Hand", options: ["Foot", "Hand", "Head", "Knee"] },
+      { question: "Which organ helps you breathe out carbon dioxide?", correct: "Lungs", options: ["Heart", "Lungs", "Liver", "Kidneys"] },
+      { question: "Which part helps you point with your foot?", correct: "Toes", options: ["Fingers", "Toes", "Heel", "Ankle"] },
+      { question: "Which organ helps you remember your teacher's name?", correct: "Brain", options: ["Heart", "Lungs", "Liver", "Brain"] },
+      { question: "Which part helps you stand on your head?", correct: "Head", options: ["Hands", "Feet", "Head", "Knees"] },
+      { question: "Which part helps you wiggle your fingers?", correct: "Hands", options: ["Feet", "Hands", "Ears", "Hair"] },
+      { question: "Which part helps you run fast?", correct: "Legs", options: ["Arms", "Legs", "Eyes", "Hair"] },
+      { question: "Which organ helps you digest food?", correct: "Stomach", options: ["Heart", "Lungs", "Stomach", "Liver"] },
+      { question: "Which part helps you feel hot or cold?", correct: "Skin", options: ["Hair", "Teeth", "Skin", "Bones"] },
+      { question: "Which part helps you give a thumbs-up?", correct: "Hand", options: ["Foot", "Hand", "Head", "Neck"] },
+      { question: "Which organ helps you feel love?", correct: "Heart", options: ["Lungs", "Heart", "Brain", "Liver"] },
+      { question: "Which part helps you crawl and climb?", correct: "Arms and Legs", options: ["Eyes and Ears", "Arms and Legs", "Hair and Skin", "Teeth and Tongue"] },
+      { question: "Which bone is in your lower arm (thumb side)?", correct: "Radius", options: ["Ulna", "Femur", "Radius", "Tibia"] },
+      { question: "Which part helps you listen to music?", correct: "Ears", options: ["Eyes", "Ears", "Mouth", "Nose"] },
+      { question: "Which organ stores urine?", correct: "Bladder", options: ["Stomach", "Bladder", "Liver", "Kidneys"] },
+      { question: "Which part helps you kick your heels?", correct: "Feet", options: ["Hands", "Feet", "Arms", "Head"] },
+      { question: "Which part helps you dream at night?", correct: "Brain", options: ["Heart", "Lungs", "Liver", "Brain"] },
+      { question: "Which part helps you point to the sky?", correct: "Finger", options: ["Toe", "Ear", "Finger", "Knee"] },
+      { question: "Which organ helps you digest food after your stomach?", correct: "Intestines", options: ["Liver", "Heart", "Intestines", "Lungs"] },
+      { question: "Which part helps you wiggle your nose?", correct: "Nose muscles", options: ["Eyes", "Nose muscles", "Tongue", "Hair"] },
+      { question: "Which organ helps you feel excited?", correct: "Heart", options: ["Lungs", "Heart", "Brain", "Liver"] },
+      { question: "Which part helps you stand tall?", correct: "Spine", options: ["Hair", "Spine", "Eyes", "Skin"] },
+      { question: "Which part helps you taste sweet candy?", correct: "Tongue", options: ["Nose", "Tongue", "Lips", "Teeth"] },
+      { question: "Which organ helps you breathe?", correct: "Lungs", options: ["Heart", "Lungs", "Stomach", "Brain"] },
+      { question: "Which part helps you hop on one foot?", correct: "Leg", options: ["Arm", "Leg", "Hand", "Head"] },
+      { question: "Which organ helps you think in school?", correct: "Brain", options: ["Heart", "Lungs", "Liver", "Brain"] },
+      { question: "Which part helps you blow your nose?", correct: "Tissue and Hands", options: ["Feet", "Tissue and Hands", "Ears", "Mouth"] },
+      { question: "Which part helps you stretch your fingers?", correct: "Hands", options: ["Feet", "Hands", "Ears", "Hair"] },
+      { question: "Which organ helps you feel happy?", correct: "Brain", options: ["Heart", "Lungs", "Liver", "Brain"] },
+      { question: "Which part helps you stomp in a puddle?", correct: "Foot", options: ["Hand", "Foot", "Knee", "Elbow"] },
+      { question: "Which organ helps you feel tired?", correct: "Brain", options: ["Heart", "Lungs", "Liver", "Brain"] },
+      { question: "Which part helps you pick up a pencil?", correct: "Fingers", options: ["Toes", "Fingers", "Knees", "Eyes"] },
+      { question: "Which organ helps you stay healthy?", correct: "All of them!", options: ["Heart", "Lungs", "All of them!", "Liver"] }
+    ];
+
+    // Shuffle array
+    function shuffle(array) {
+      const arr = [...array];
+      for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+      }
+      return arr;
+    }
+
+    // === Sound Unlock ===
+    const unlockBtn = document.getElementById("unlock-sound");
+    const correctSound = document.getElementById("correctSound");
+    const wrongSound = document.getElementById("wrongSound");
+
+    function unlockAudio() {
+      correctSound.play().then(() => correctSound.pause()).catch(() => {});
+      wrongSound.play().then(() => wrongSound.pause()).catch(() => {});
+      unlockBtn.style.display = "none";
+    }
+    unlockBtn.addEventListener("click", unlockAudio);
+    document.addEventListener("touchstart", unlockAudio, { once: true });
+    document.addEventListener("click", unlockAudio, { once: true });
+
+    // === Quiz Variables ===
+    let score = 0;
+    let totalQuestions = 10; // You can change this
+    let answered = 0;
+    let startTime, endTime;
+    let responseTimes = [];
+
+    const questionEl = document.getElementById("question");
+    const timerEl = document.getElementById("timer");
+    const optionsEl = document.getElementById("options");
+    const feedbackEl = document.getElementById("feedback");
+    const statsEl = document.getElementById("stats");
+    const nextBtn = document.getElementById("next-btn");
+    const summaryEl = document.getElementById("summary");
+
+    let timerInterval;
+    let timeLeft = 15;
+
+    function startTimer() {
+      timeLeft = 15;
+      timerEl.textContent = `Time: ${timeLeft}s`;
+      clearInterval(timerInterval);
+      startTime = Date.now();
+
+      timerInterval = setInterval(() => {
+        timeLeft--;
+        timerEl.textContent = `Time: ${timeLeft}s`;
+        if (timeLeft <= 0) {
+          clearInterval(timerInterval);
+          feedbackEl.textContent = "⏰ Time's up!";
+          feedbackEl.style.color = "#FF6B6B";
+          disableOptions();
+          nextBtn.disabled = false;
+          endTime = Date.now();
+          const timeTaken = Math.round((endTime - startTime) / 1000);
+          responseTimes.push(timeTaken);
+          statsEl.textContent = `You took ${timeTaken} seconds.`;
+        }
+      }, 1000);
+    }
+
+    function disableOptions() {
+      const buttons = document.querySelectorAll(".option-btn");
+      buttons.forEach(btn => {
+        btn.disabled = true;
+        btn.style.opacity = "0.6";
+      });
+    }
+
+    function loadQuestion() {
+      if (answered >= totalQuestions) {
+        showFinalSummary();
+        return;
+      }
+
+      const q = bodyParts[Math.floor(Math.random() * bodyParts.length)];
+      questionEl.textContent = q.question;
+
+      const shuffledOptions = shuffle(q.options);
+      optionsEl.innerHTML = "";
+
+      shuffledOptions.forEach(option => {
+        const btn = document.createElement("button");
+        btn.classList.add("option-btn");
+        btn.textContent = option;
+        btn.addEventListener("click", () => selectAnswer(option, q.correct));
+        optionsEl.appendChild(btn);
+      });
+
+      feedbackEl.textContent = "";
+      feedbackEl.style.color = "white";
+      statsEl.textContent = "";
+      nextBtn.disabled = true;
+      nextBtn.textContent = "Next Question ➡️";
+
+      startTimer();
+    }
+
+    function selectAnswer(selected, correct) {
+      clearInterval(timerInterval);
+      endTime = Date.now();
+      const timeTaken = Math.round((endTime - startTime) / 1000);
+      responseTimes.push(timeTaken);
+      statsEl.textContent = `You took ${timeTaken} seconds.`;
+
+      if (selected === correct) {
+        feedbackEl.textContent = "🎉 Correct! You're awesome!";
+        feedbackEl.style.color = "#00FF9D";
+        playSound(correctSound);
+        score++;
+      } else {
+        feedbackEl.textContent = `❌ Nope! It's ${correct}.`;
+        feedbackEl.style.color = "#FF6B6B";
+        playSound(wrongSound);
+      }
+
+      disableOptions();
+      nextBtn.disabled = false;
+      answered++;
+    }
+
+    function playSound(sound) {
+      sound.currentTime = 0;
+      sound.play().catch(e => console.log("Sound blocked:", e));
+    }
+
+    nextBtn.addEventListener("click", () => {
+      if (answered <= totalQuestions) {
+        loadQuestion();
+      }
+    });
+
+    function showFinalSummary() {
+      clearInterval(timerInterval);
+      const totalTime = responseTimes.reduce((a, b) => a + b, 0);
+      const avgTime = (totalTime / responseTimes.length).toFixed(1);
+
+      document.querySelector(".quiz-container").style.display = "none";
+      summaryEl.style.display = "block";
+      document.getElementById("total-count").textContent = totalQuestions;
+      document.getElementById("correct-count").textContent = score;
+      document.getElementById("wrong-count").textContent = totalQuestions - score;
+      document.getElementById("total-time").textContent = totalTime;
+      document.getElementById("avg-time").textContent = avgTime;
+    }
+
+    // Start the quiz
+    loadQuestion();
+  </script>
+</body>
+</html>
