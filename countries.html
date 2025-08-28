@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🌍 Capital Quiz Game 🕒</title>
+  <style>
+    body {
+      font-family: 'Comic Sans MS', cursive, sans-serif;
+      background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+      color: white;
+      text-align: center;
+      padding: 20px;
+      margin: 0;
+      min-height: 100vh;
+    }
+    h1 {
+      font-size: 2.2em;
+      text-shadow: 2px 2px 8px rgba(0,0,0,0.3);
+    }
+    p {
+      font-size: 18px;
+    }
+    .quiz-container {
+      max-width: 600px;
+      margin: 20px auto;
+      background: rgba(255, 255, 255, 0.15);
+      padding: 25px;
+      border-radius: 20px;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+    }
+    .question {
+      font-size: 22px;
+      margin-bottom: 15px;
+      min-height: 60px;
+      line-height: 1.4;
+    }
+    .timer {
+      font-size: 18px;
+      color: #FFD700;
+      font-weight: bold;
+      margin-bottom: 15px;
+    }
+    .options {
+      display: grid;
+      gap: 12px;
+      margin-bottom: 15px;
+    }
+    button.option-btn {
+      padding: 16px;
+      font-size: 18px;
+      border: none;
+      border-radius: 15px;
+      cursor: pointer;
+      background: rgba(255, 255, 255, 0.2);
+      color: white;
+      transition: all 0.2s ease;
+    }
+    button.option-btn:hover {
+      background: rgba(255, 255, 255, 0.4);
+    }
+    .feedback {
+      font-size: 20px;
+      margin: 10px 0;
+      min-height: 24px;
+      font-weight: bold;
+    }
+    .stats {
+      font-size: 18px;
+      color: #fff;
+      margin-top: 10px;
+    }
+    .next-btn {
+      padding: 12px 25px;
+      font-size: 18px;
+      background: #FFD700;
+      color: #333;
+      border: none;
+      border-radius: 15px;
+      cursor: pointer;
+      font-weight: bold;
+      margin-top: 10px;
+    }
+    .tap-instruction {
+      background: #FFECB3;
+      color: #D84315;
+      padding: 12px;
+      border-radius: 12px;
+      margin: 15px auto;
+      max-width: 90%;
+      font-size: 16px;
+      display: inline-block;
+    }
+    .final-summary {
+      background: rgba(0,0,0,0.3);
+      padding: 20px;
+      border-radius: 15px;
+      margin-top: 20px;
+      font-size: 19px;
+      line-height: 1.6;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>🌍 Capital Quiz Game 🕒</h1>
+  <p>Guess the capital of each country — you have 15 seconds per question!</p>
+
+  <!-- Sound Unlock -->
+  <button class="tap-instruction" id="unlock-sound">🔊 Tap to unlock sounds!</button>
+
+  <div class="quiz-container">
+    <div class="question" id="question">Loading...</div>
+    <div class="timer" id="timer">Time: 15s</div>
+    <div class="options" id="options"></div>
+    <div class="feedback" id="feedback"></div>
+    <div class="stats" id="stats"></div>
+    <button class="next-btn" id="next-btn">Next Question ➡️</button>
+  </div>
+
+  <div class="final-summary" id="summary" style="display:none;">
+    <h2>🎉 Quiz Complete!</h2>
+    <p><strong>Questions Answered:</strong> <span id="total-count">0</span></p>
+    <p><strong>Correct:</strong> <span id="correct-count">0</span></p>
+    <p><strong>Wrong:</strong> <span id="wrong-count">0</span></p>
+    <p><strong>Total Time:</strong> <span id="total-time">0</span> seconds</p>
+    <p><strong>Average Time per Question:</strong> <span id="avg-time">0</span> seconds</p>
+  </div>
+
+  <!-- Sound Effects -->
+  <audio id="correctSound" src="https://www.soundjay.com/buttons/sounds/button-08.mp3"></audio>
+  <audio id="wrongSound" src="https://www.soundjay.com/buttons/sounds/button-06.mp3"></audio>
+
+  <script>
+    // === Full List of Countries and Capitals ===
+    const countries = [
+      { country: "Afghanistan", capital: "Kabul" },
+      { country: "Albania", capital: "Tirana" },
+      { country: "Algeria", capital: "Algiers" },
+      { country: "Andorra", capital: "Andorra la Vella" },
+      { country: "Angola", capital: "Luanda" },
+      { country: "Antigua and Barbuda", capital: "Saint John's" },
+      { country: "Argentina", capital: "Buenos Aires" },
+      { country: "Armenia", capital: "Yerevan" },
+      { country: "Australia", capital: "Canberra" },
+      { country: "Austria", capital: "Vienna" },
+      { country: "Azerbaijan", capital: "Baku" },
+      { country: "Bahamas", capital: "Nassau" },
+      { country: "Bahrain", capital: "Manama" },
+      { country: "Bangladesh", capital: "Dhaka" },
+      { country: "Barbados", capital: "Bridgetown" },
+      { country: "Belarus", capital: "Minsk" },
+      { country: "Belgium", capital: "Brussels" },
+      { country: "Belize", capital: "Belmopan" },
+      { country: "Benin", capital: "Porto-Novo" },
+      { country: "Bhutan", capital: "Thimphu" },
+      { country: "Bolivia", capital: "Sucre" },
+      { country: "Bosnia and Herzegovina", capital: "Sarajevo" },
+      { country: "Botswana", capital: "Gaborone" },
+      { country: "Brazil", capital: "Brasília" },
+      { country: "Brunei", capital: "Bandar Seri Begawan" },
+      { country: "Bulgaria", capital: "Sofia" },
+      { country: "Burkina Faso", capital: "Ouagadougou" },
+      { country: "Burundi", capital: "Gitega" },
+      { country: "Cabo Verde", capital: "Praia" },
+      { country: "Cambodia", capital: "Phnom Penh" },
+      { country: "Cameroon", capital: "Yaoundé" },
+      { country: "Canada", capital: "Ottawa" },
+      { country: "Central African Republic", capital: "Bangui" },
+      { country: "Chad", capital: "N'Djamena" },
+      { country: "Chile", capital: "Santiago" },
+      { country: "China", capital: "Beijing" },
+      { country: "Colombia", capital: "Bogotá" },
+      { country: "Comoros", capital: "Moroni" },
+      { country: "Congo (Congo-Brazzaville)", capital: "Brazzaville" },
+      { country: "Costa Rica", capital: "San José" },
+      { country: "Croatia", capital: "Zagreb" },
+      { country: "Cuba", capital: "Havana" },
+      { country: "Cyprus", capital: "Nicosia" },
+      { country: "Czechia (Czech Republic)", capital: "Prague" },
+      { country: "Denmark", capital: "Copenhagen" },
+      { country: "Djibouti", capital: "Djibouti" },
+      { country: "Dominica", capital: "Roseau" },
+      { country: "Dominican Republic", capital: "Santo Domingo" },
+      { country: "Ecuador", capital: "Quito" },
+      { country: "Egypt", capital: "Cairo" },
+      { country: "El Salvador", capital: "San Salvador" },
+      { country: "Equatorial Guinea", capital: "Malabo" },
+      { country: "Eritrea", capital: "Asmara" },
+      { country: "Estonia", capital: "Tallinn" },
+      { country: "Eswatini", capital: "Mbabane" },
+      { country: "Ethiopia", capital: "Addis Ababa" },
+      { country: "Fiji", capital: "Suva" },
+      { country: "Finland", capital: "Helsinki" },
+      { country: "France", capital: "Paris" },
+      { country: "Gabon", capital: "Libreville" },
+      { country: "Gambia", capital: "Banjul" },
+      { country: "Georgia", capital: "Tbilisi" },
+      { country: "Germany", capital: "Berlin" },
+      { country: "Ghana", capital: "Accra" },
+      { country: "Greece", capital: "Athens" },
+      { country: "Grenada", capital: "St. George's" },
+      { country: "Guatemala", capital: "Guatemala City" },
+      { country: "Guinea", capital: "Conakry" },
+      { country: "Guinea-Bissau", capital: "Bissau" },
+      { country: "Guyana", capital: "Georgetown" },
+      { country: "Haiti", capital: "Port-au-Prince" },
+      { country: "Honduras", capital: "Tegucigalpa" },
+      { country: "Hungary", capital: "Budapest" },
+      { country: "Iceland", capital: "Reykjavik" },
+      { country: "India", capital: "New Delhi" },
+      { country: "Indonesia", capital: "Jakarta" },
+      { country: "Iran", capital: "Tehran" },
+      { country: "Iraq", capital: "Baghdad" },
+      { country: "Ireland", capital: "Dublin" },
+      { country: "Israel", capital: "Jerusalem" },
+      { country: "Italy", capital: "Rome" },
+      { country: "Jamaica", capital: "Kingston" },
+      { country: "Japan", capital: "Tokyo" },
+      { country: "Jordan", capital: "Amman" },
+      { country: "Kazakhstan", capital: "Astana" },
+      { country: "Kenya", capital: "Nairobi" },
+      { country: "Kiribati", capital: "South Tarawa" },
+      { country: "Kuwait", capital: "Kuwait City" },
+      { country: "Kyrgyzstan", capital: "Bishkek" },
+      { country: "Laos", capital: "Vientiane" },
+      { country: "Latvia", capital: "Riga" },
+      { country: "Lebanon", capital: "Beirut" },
+      { country: "Lesotho", capital: "Maseru" },
+      { country: "Liberia", capital: "Monrovia" },
+      { country: "Libya", capital: "Tripoli" },
+      { country: "Liechtenstein", capital: "Vaduz" },
+      { country: "Lithuania", capital: "Vilnius" },
+      { country: "Luxembourg", capital: "Luxembourg" },
+      { country: "Madagascar", capital: "Antananarivo" },
+      { country: "Malawi", capital: "Lilongwe" },
+      { country: "Malaysia", capital: "Kuala Lumpur" },
+      { country: "Maldives", capital: "Malé" },
+      { country: "Mali", capital: "Bamako" },
+      { country: "Malta", capital: "Valletta" },
+      { country: "Marshall Islands", capital: "Majuro" },
+      { country: "Mauritania", capital: "Nouakchott" },
+      { country: "Mauritius", capital: "Port Louis" },
+      { country: "Mexico", capital: "Mexico City" },
+      { country: "Micronesia", capital: "Palikir" },
+      { country: "Moldova", capital: "Chișinău" },
+      { country: "Monaco", capital: "Monaco" },
+      { country: "Mongolia", capital: "Ulaanbaatar" },
+      { country: "Montenegro", capital: "Podgorica" },
+      { country: "Morocco", capital: "Rabat" },
+      { country: "Mozambique", capital: "Maputo" },
+      { country: "Myanmar (Burma)", capital: "Naypyidaw" },
+      { country: "Namibia", capital: "Windhoek" },
+      { country: "Nauru", capital: "Yaren" },
+      { country: "Nepal", capital: "Kathmandu" },
+      { country: "Netherlands", capital: "Amsterdam" },
+      { country: "New Zealand", capital: "Wellington" },
+      { country: "Nicaragua", capital: "Managua" },
+      { country: "Niger", capital: "Niamey" },
+      { country: "Nigeria", capital: "Abuja" },
+      { country: "North Korea", capital: "Pyongyang" },
+      { country: "North Macedonia", capital: "Skopje" },
+      { country: "Norway", capital: "Oslo" },
+      { country: "Oman", capital: "Muscat" },
+      { country: "Pakistan", capital: "Islamabad" },
+      { country: "Palau", capital: "Ngerulmud" },
+      { country: "Palestine", capital: "Ramallah" },
+      { country: "Panama", capital: "Panama City" },
+      { country: "Papua New Guinea", capital: "Port Moresby" },
+      { country: "Paraguay", capital: "Asunción" },
+      { country: "Peru", capital: "Lima" },
+      { country: "Philippines", capital: "Manila" },
+      { country: "Poland", capital: "Warsaw" },
+      { country: "Portugal", capital: "Lisbon" },
+      { country: "Qatar", capital: "Doha" },
+      { country: "Romania", capital: "Bucharest" },
+      { country: "Russia", capital: "Moscow" },
+      { country: "Rwanda", capital: "Kigali" },
+      { country: "Saint Kitts and Nevis", capital: "Basseterre" },
+      { country: "Saint Lucia", capital: "Castries" },
+      { country: "Saint Vincent and the Grenadines", capital: "Kingstown" },
+      { country: "Samoa", capital: "Apia" },
+      { country: "San Marino", capital: "San Marino" },
+      { country: "Sao Tome and Principe", capital: "São Tomé" },
+      { country: "Saudi Arabia", capital: "Riyadh" },
+      { country: "Senegal", capital: "Dakar" },
+      { country: "Serbia", capital: "Belgrade" },
+      { country: "Seychelles", capital: "Victoria" },
+      { country: "Sierra Leone", capital: "Freetown" },
+      { country: "Singapore", capital: "Singapore" },
+      { country: "Slovakia", capital: "Bratislava" },
+      { country: "Slovenia", capital: "Ljubljana" },
+      { country: "Solomon Islands", capital: "Honiara" },
+      { country: "Somalia", capital: "Mogadishu" },
+      { country: "South Africa", capital: "Pretoria" },
+      { country: "South Korea", capital: "Seoul" },
+      { country: "South Sudan", capital: "Juba" },
+      { country: "Spain", capital: "Madrid" },
+      { country: "Sri Lanka", capital: "Sri Jayawardenepura Kotte" },
+      { country: "Sudan", capital: "Khartoum" },
+      { country: "Suriname", capital: "Paramaribo" },
+      { country: "Sweden", capital: "Stockholm" },
+      { country: "Switzerland", capital: "Bern" },
+      { country: "Syria", capital: "Damascus" },
+      { country: "Tajikistan", capital: "Dushanbe" },
+      { country: "Tanzania", capital: "Dodoma" },
+      { country: "Thailand", capital: "Bangkok" },
+      { country: "Timor-Leste", capital: "Dili" },
+      { country: "Togo", capital: "Lomé" },
+      { country: "Tonga", capital: "Nuku'alofa" },
+      { country: "Trinidad and Tobago", capital: "Port of Spain" },
+      { country: "Tunisia", capital: "Tunis" },
+      { country: "Turkey", capital: "Ankara" },
+      { country: "Turkmenistan", capital: "Ashgabat" },
+      { country: "Tuvalu", capital: "Funafuti" },
+      { country: "Uganda", capital: "Kampala" },
+      { country: "Ukraine", capital: "Kyiv" },
+      { country: "United Arab Emirates", capital: "Abu Dhabi" },
+      { country: "United Kingdom", capital: "London" },
+      { country: "United States", capital: "Washington, D.C." },
+      { country: "Uruguay", capital: "Montevideo" },
+      { country: "Uzbekistan", capital: "Tashkent" },
+      { country: "Vanuatu", capital: "Port Vila" },
+      { country: "Vatican City", capital: "Vatican City" },
+      { country: "Venezuela", capital: "Caracas" },
+      { country: "Vietnam", capital: "Hanoi" },
+      { country: "Yemen", capital: "Sana'a" },
+      { country: "Zambia", capital: "Lusaka" },
+      { country: "Zimbabwe", capital: "Harare" }
+    ];
+
+    // Shuffle array
+    function shuffle(array) {
+      const arr = [...array];
+      for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+      }
+      return arr;
+    }
+
+    // Get 4 random options (1 correct, 3 wrong)
+    function getOptions(correctCapital) {
+      const allCapitals = countries.map(c => c.capital);
+      let options = [correctCapital];
+      while (options.length < 4) {
+        const random = allCapitals[Math.floor(Math.random() * allCapitals.length)];
+        if (!options.includes(random)) {
+          options.push(random);
+        }
+      }
+      return shuffle(options);
+    }
+
+    // === Sound Unlock ===
+    const unlockBtn = document.getElementById("unlock-sound");
+    const correctSound = document.getElementById("correctSound");
+    const wrongSound = document.getElementById("wrongSound");
+
+    function unlockAudio() {
+      correctSound.play().then(() => correctSound.pause()).catch(() => {});
+      wrongSound.play().then(() => wrongSound.pause()).catch(() => {});
+      unlockBtn.style.display = "none";
+    }
+    unlockBtn.addEventListener("click", unlockAudio);
+    document.addEventListener("touchstart", unlockAudio, { once: true });
+    document.addEventListener("click", unlockAudio, { once: true });
+
+    // === Quiz Variables ===
+    let score = 0;
+    let totalQuestions = 10; // You can change this
+    let answered = 0;
+    let startTime, endTime;
+    let responseTimes = []; // Store time per answer
+
+    const questionEl = document.getElementById("question");
+    const timerEl = document.getElementById("timer");
+    const optionsEl = document.getElementById("options");
+    const feedbackEl = document.getElementById("feedback");
+    const statsEl = document.getElementById("stats");
+    const nextBtn = document.getElementById("next-btn");
+    const summaryEl = document.getElementById("summary");
+
+    let timerInterval;
+    let timeLeft = 15;
+
+    // Start timer for question
+    function startTimer() {
+      timeLeft = 15;
+      timerEl.textContent = `Time: ${timeLeft}s`;
+      clearInterval(timerInterval);
+      startTime = Date.now();
+
+      timerInterval = setInterval(() => {
+        timeLeft--;
+        timerEl.textContent = `Time: ${timeLeft}s`;
+        if (timeLeft <= 0) {
+          clearInterval(timerInterval);
+          feedbackEl.textContent = "⏰ Time's up!";
+          feedbackEl.style.color = "#FF6B6B";
+          disableOptions();
+          nextBtn.disabled = false;
+          endTime = Date.now();
+          const timeTaken = Math.round((endTime - startTime) / 1000);
+          responseTimes.push(timeTaken);
+          statsEl.textContent = `You took ${timeTaken} seconds.`;
+        }
+      }, 1000);
+    }
+
+    function disableOptions() {
+      const buttons = document.querySelectorAll(".option-btn");
+      buttons.forEach(btn => {
+        btn.disabled = true;
+        btn.style.opacity = "0.6";
+      });
+    }
+
+    function loadQuestion() {
+      if (answered >= totalQuestions) {
+        showFinalSummary();
+        return;
+      }
+
+      const randomCountry = countries[Math.floor(Math.random() * countries.length)];
+      const { country, capital } = randomCountry;
+
+      questionEl.textContent = `What is the capital of ${country}?`;
+      const options = getOptions(capital);
+
+      optionsEl.innerHTML = "";
+      options.forEach(option => {
+        const btn = document.createElement("button");
+        btn.classList.add("option-btn");
+        btn.textContent = option;
+        btn.addEventListener("click", () => selectAnswer(option, capital));
+        optionsEl.appendChild(btn);
+      });
+
+      feedbackEl.textContent = "";
+      feedbackEl.style.color = "white";
+      statsEl.textContent = "";
+      nextBtn.disabled = true;
+      nextBtn.textContent = "Next Question ➡️";
+
+      startTimer();
+    }
+
+    function selectAnswer(selected, correct) {
+      clearInterval(timerInterval);
+      endTime = Date.now();
+      const timeTaken = Math.round((endTime - startTime) / 1000);
+      responseTimes.push(timeTaken);
+      statsEl.textContent = `You took ${timeTaken} seconds.`;
+
+      if (selected === correct) {
+        feedbackEl.textContent = "✅ Correct!";
+        feedbackEl.style.color = "#00FF9D";
+        playSound(correctSound);
+        score++;
+      } else {
+        feedbackEl.textContent = `❌ Wrong! It's ${correct}.`;
+        feedbackEl.style.color = "#FF6B6B";
+        playSound(wrongSound);
+      }
+
+      disableOptions();
+      nextBtn.disabled = false;
+      answered++;
+    }
+
+    function playSound(sound) {
+      sound.currentTime = 0;
+      sound.play().catch(e => console.log("Sound blocked:", e));
+    }
+
+    nextBtn.addEventListener("click", () => {
+      if (answered < totalQuestions) {
+        loadQuestion();
+      } else {
+        showFinalSummary();
+      }
+    });
+
+    function showFinalSummary() {
+      clearInterval(timerInterval);
+      const totalTime = responseTimes.reduce((a, b) => a + b, 0);
+      const avgTime = (totalTime / responseTimes.length).toFixed(1);
+
+      document.querySelector(".quiz-container").style.display = "none";
+      summaryEl.style.display = "block";
+      document.getElementById("total-count").textContent = totalQuestions;
+      document.getElementById("correct-count").textContent = score;
+      document.getElementById("wrong-count").textContent = totalQuestions - score;
+      document.getElementById("total-time").textContent = totalTime;
+      document.getElementById("avg-time").textContent = avgTime;
+    }
+
+    // Start the quiz
+    loadQuestion();
+  </script>
+</body>
+</html>
