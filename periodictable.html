@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Periodic Table Challenge 🧪 (with Atomic Numbers)</title>
+  <style>
+    body {
+      font-family: 'Comic Sans MS', cursive, sans-serif;
+      background: linear-gradient(135deg, #a8e6cf, #dcecc9);
+      text-align: center;
+      padding: 20px;
+      color: #333;
+      margin: 0;
+    }
+    h1 {
+      color: #0057b7;
+      text-shadow: 2px 2px 5px rgba(255,255,255,0.7);
+    }
+    .game-container {
+      max-width: 700px;
+      margin: 0 auto;
+      padding: 20px;
+      background: white;
+      border-radius: 20px;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+    }
+    .question {
+      font-size: 1.4em;
+      margin: 20px 0;
+      color: #d35400;
+      font-weight: bold;
+    }
+    .options {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 12px;
+      margin: 20px auto;
+      max-width: 500px;
+    }
+    button.option {
+      padding: 16px;
+      font-size: 1.2em;
+      background: #ffdb58;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    button.option:hover {
+      background: #ffd700;
+      transform: scale(1.03);
+    }
+    button.option.correct {
+      background: #27ae60;
+      color: white;
+    }
+    button.option.wrong {
+      background: #e74c3c;
+      color: white;
+    }
+    .feedback {
+      margin: 20px 0;
+      font-size: 1.3em;
+      font-weight: bold;
+      min-height: 30px;
+    }
+    .element-info {
+      font-size: 1.1em;
+      color: #7f8c8d;
+      margin: 15px 0;
+      font-style: italic;
+    }
+    .score-board {
+      font-size: 1.3em;
+      color: #2980b9;
+      margin: 15px 0;
+    }
+    .progress {
+      font-size: 1.1em;
+      color: #555;
+      margin: 10px 0;
+    }
+    button.main-btn {
+      padding: 12px 25px;
+      font-size: 1.1em;
+      background: #0057b7;
+      color: white;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      margin: 10px;
+    }
+    button.main-btn:hover {
+      background: #003366;
+    }
+    .celebration {
+      animation: bounce 0.5s;
+      color: gold;
+      text-shadow: 0 0 10px yellow;
+    }
+    @keyframes bounce {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="game-container">
+    <h1>🧪 Periodic Table Challenge 🎯</h1>
+    <p>30 questions • +1 for correct • –1 for wrong • Learn atomic numbers!</p>
+
+    <div class="score-board">Score: <span id="score">0</span></div>
+    <div class="progress">Question <span id="current-q">1</span> of 30</div>
+
+    <div class="question" id="question">Loading...</div>
+
+    <div class="options" id="options">
+      <!-- Options will be added here -->
+    </div>
+
+    <div class="feedback" id="feedback"></div>
+    <div class="element-info" id="element-info"></div>
+
+    <button class="main-btn" id="next-btn" style="display:none;">Next Question ➡️</button>
+    <button class="main-btn" id="play-again" style="display:none;">Play Again? 🎮</button>
+  </div>
+
+  <script>
+    // Full list of 118 elements with atomic number, name, and symbol
+    const elements = [
+      { number: 1, name: "Hydrogen", symbol: "H" },
+      { number: 2, name: "Helium", symbol: "He" },
+      { number: 3, name: "Lithium", symbol: "Li" },
+      { number: 4, name: "Beryllium", symbol: "Be" },
+      { number: 5, name: "Boron", symbol: "B" },
+      { number: 6, name: "Carbon", symbol: "C" },
+      { number: 7, name: "Nitrogen", symbol: "N" },
+      { number: 8, name: "Oxygen", symbol: "O" },
+      { number: 9, name: "Fluorine", symbol: "F" },
+      { number: 10, name: "Neon", symbol: "Ne" },
+      { number: 11, name: "Sodium", symbol: "Na" },
+      { number: 12, name: "Magnesium", symbol: "Mg" },
+      { number: 13, name: "Aluminum", symbol: "Al" },
+      { number: 14, name: "Silicon", symbol: "Si" },
+      { number: 15, name: "Phosphorus", symbol: "P" },
+      { number: 16, name: "Sulfur", symbol: "S" },
+      { number: 17, name: "Chlorine", symbol: "Cl" },
+      { number: 18, name: "Argon", symbol: "Ar" },
+      { number: 19, name: "Potassium", symbol: "K" },
+      { number: 20, name: "Calcium", symbol: "Ca" },
+      { number: 21, name: "Scandium", symbol: "Sc" },
+      { number: 22, name: "Titanium", symbol: "Ti" },
+      { number: 23, name: "Vanadium", symbol: "V" },
+      { number: 24, name: "Chromium", symbol: "Cr" },
+      { number: 25, name: "Manganese", symbol: "Mn" },
+      { number: 26, name: "Iron", symbol: "Fe" },
+      { number: 27, name: "Cobalt", symbol: "Co" },
+      { number: 28, name: "Nickel", symbol: "Ni" },
+      { number: 29, name: "Copper", symbol: "Cu" },
+      { number: 30, name: "Zinc", symbol: "Zn" },
+      { number: 31, name: "Gallium", symbol: "Ga" },
+      { number: 32, name: "Germanium", symbol: "Ge" },
+      { number: 33, name: "Arsenic", symbol: "As" },
+      { number: 34, name: "Selenium", symbol: "Se" },
+      { number: 35, name: "Bromine", symbol: "Br" },
+      { number: 36, name: "Krypton", symbol: "Kr" },
+      { number: 37, name: "Rubidium", symbol: "Rb" },
+      { number: 38, name: "Strontium", symbol: "Sr" },
+      { number: 39, name: "Yttrium", symbol: "Y" },
+      { number: 40, name: "Zirconium", symbol: "Zr" },
+      { number: 41, name: "Niobium", symbol: "Nb" },
+      { number: 42, name: "Molybdenum", symbol: "Mo" },
+      { number: 43, name: "Technetium", symbol: "Tc" },
+      { number: 44, name: "Ruthenium", symbol: "Ru" },
+      { number: 45, name: "Rhodium", symbol: "Rh" },
+      { number: 46, name: "Palladium", symbol: "Pd" },
+      { number: 47, name: "Silver", symbol: "Ag" },
+      { number: 48, name: "Cadmium", symbol: "Cd" },
+      { number: 49, name: "Indium", symbol: "In" },
+      { number: 50, name: "Tin", symbol: "Sn" },
+      { number: 51, name: "Antimony", symbol: "Sb" },
+      { number: 52, name: "Tellurium", symbol: "Te" },
+      { number: 53, name: "Iodine", symbol: "I" },
+      { number: 54, name: "Xenon", symbol: "Xe" },
+      { number: 55, name: "Cesium", symbol: "Cs" },
+      { number: 56, name: "Barium", symbol: "Ba" },
+      { number: 57, name: "Lanthanum", symbol: "La" },
+      { number: 58, name: "Cerium", symbol: "Ce" },
+      { number: 59, name: "Praseodymium", symbol: "Pr" },
+      { number: 60, name: "Neodymium", symbol: "Nd" },
+      { number: 61, name: "Promethium", symbol: "Pm" },
+      { number: 62, name: "Samarium", symbol: "Sm" },
+      { number: 63, name: "Europium", symbol: "Eu" },
+      { number: 64, name: "Gadolinium", symbol: "Gd" },
+      { number: 65, name: "Terbium", symbol: "Tb" },
+      { number: 66, name: "Dysprosium", symbol: "Dy" },
+      { number: 67, name: "Holmium", symbol: "Ho" },
+      { number: 68, name: "Erbium", symbol: "Er" },
+      { number: 69, name: "Thulium", symbol: "Tm" },
+      { number: 70, name: "Ytterbium", symbol: "Yb" },
+      { number: 71, name: "Lutetium", symbol: "Lu" },
+      { number: 72, name: "Hafnium", symbol: "Hf" },
+      { number: 73, name: "Tantalum", symbol: "Ta" },
+      { number: 74, name: "Tungsten", symbol: "W" },
+      { number: 75, name: "Rhenium", symbol: "Re" },
+      { number: 76, name: "Osmium", symbol: "Os" },
+      { number: 77, name: "Iridium", symbol: "Ir" },
+      { number: 78, name: "Platinum", symbol: "Pt" },
+      { number: 79, name: "Gold", symbol: "Au" },
+      { number: 80, name: "Mercury", symbol: "Hg" },
+      { number: 81, name: "Thallium", symbol: "Tl" },
+      { number: 82, name: "Lead", symbol: "Pb" },
+      { number: 83, name: "Bismuth", symbol: "Bi" },
+      { number: 84, name: "Polonium", symbol: "Po" },
+      { number: 85, name: "Astatine", symbol: "At" },
+      { number: 86, name: "Radon", symbol: "Rn" },
+      { number: 87, name: "Francium", symbol: "Fr" },
+      { number: 88, name: "Radium", symbol: "Ra" },
+      { number: 89, name: "Actinium", symbol: "Ac" },
+      { number: 90, name: "Thorium", symbol: "Th" },
+      { number: 91, name: "Protactinium", symbol: "Pa" },
+      { number: 92, name: "Uranium", symbol: "U" },
+      { number: 93, name: "Neptunium", symbol: "Np" },
+      { number: 94, name: "Plutonium", symbol: "Pu" },
+      { number: 95, name: "Americium", symbol: "Am" },
+      { number: 96, name: "Curium", symbol: "Cm" },
+      { number: 97, name: "Berkelium", symbol: "Bk" },
+      { number: 98, name: "Californium", symbol: "Cf" },
+      { number: 99, name: "Einsteinium", symbol: "Es" },
+      { number: 100, name: "Fermium", symbol: "Fm" },
+      { number: 101, name: "Mendelevium", symbol: "Md" },
+      { number: 102, name: "Nobelium", symbol: "No" },
+      { number: 103, name: "Lawrencium", symbol: "Lr" },
+      { number: 104, name: "Rutherfordium", symbol: "Rf" },
+      { number: 105, name: "Dubnium", symbol: "Db" },
+      { number: 106, name: "Seaborgium", symbol: "Sg" },
+      { number: 107, name: "Bohrium", symbol: "Bh" },
+      { number: 108, name: "Hassium", symbol: "Hs" },
+      { number: 109, name: "Meitnerium", symbol: "Mt" },
+      { number: 110, name: "Darmstadtium", symbol: "Ds" },
+      { number: 111, name: "Roentgenium", symbol: "Rg" },
+      { number: 112, name: "Copernicium", symbol: "Cn" },
+      { number: 113, name: "Nihonium", symbol: "Nh" },
+      { number: 114, name: "Flerovium", symbol: "Fl" },
+      { number: 115, name: "Moscovium", symbol: "Mc" },
+      { number: 116, name: "Livermorium", symbol: "Lv" },
+      { number: 117, name: "Tennessine", symbol: "Ts" },
+      { number: 118, name: "Oganesson", symbol: "Og" }
+    ];
+
+    // Game variables
+    let score = 0;
+    let currentQuestion = 1;
+    const totalQuestions = 30;
+    let questionPool = [];
+    let currentElement = null;
+
+    // DOM elements
+    const questionEl = document.getElementById("question");
+    const optionsEl = document.getElementById("options");
+    const feedbackEl = document.getElementById("feedback");
+    const infoEl = document.getElementById("element-info");
+    const scoreEl = document.getElementById("score");
+    const currentQEl = document.getElementById("current-q");
+    const nextBtn = document.getElementById("next-btn");
+    const playAgainBtn = document.getElementById("play-again");
+
+    // Initialize game
+    function startGame() {
+      score = 0;
+      currentQuestion = 1;
+      scoreEl.textContent = score;
+      currentQEl.textContent = currentQuestion;
+
+      // Shuffle all elements and pick 30 unique ones
+      const shuffled = [...elements];
+      shuffleArray(shuffled);
+      questionPool = shuffled.slice(0, 30);
+
+      nextBtn.style.display = "none";
+      playAgainBtn.style.display = "none";
+      feedbackEl.textContent = "";
+      infoEl.textContent = "";
+
+      loadQuestion();
+    }
+
+    // Load current question
+    function loadQuestion() {
+      if (currentQuestion > totalQuestions) {
+        endGame();
+        return;
+      }
+
+      currentElement = questionPool[currentQuestion - 1];
+      currentQEl.textContent = currentQuestion;
+
+      optionsEl.innerHTML = "";
+      feedbackEl.textContent = "";
+      infoEl.textContent = "";
+
+      questionEl.textContent = `What is the name of the element with symbol "${currentElement.symbol}"?`;
+
+      // Generate 4 answer options
+      const options = [currentElement.name];
+      while (options.length < 4) {
+        const randomEl = elements[Math.floor(Math.random() * elements.length)].name;
+        if (!options.includes(randomEl)) {
+          options.push(randomEl);
+        }
+      }
+      shuffleArray(options);
+
+      // Add buttons
+      options.forEach(name => {
+        const btn = document.createElement("button");
+        btn.classList.add("option");
+        btn.textContent = name;
+        btn.addEventListener("click", () => checkAnswer(name, btn));
+        optionsEl.appendChild(btn);
+      });
+    }
+
+    // Check answer
+    function checkAnswer(selected, button) {
+      const allButtons = document.querySelectorAll(".option");
+      allButtons.forEach(btn => (btn.disabled = true));
+
+      if (selected === currentElement.name) {
+        score++;
+        scoreEl.textContent = score;
+        feedbackEl.innerHTML = "✅ Correct! Awesome! 🎉";
+        feedbackEl.classList.add("celebration");
+        setTimeout(() => feedbackEl.classList.remove("celebration"), 500);
+        button.classList.add("correct");
+      } else {
+        score--;
+        scoreEl.textContent = score;
+        feedbackEl.textContent = `❌ Wrong! It was ${currentElement.name}.`;
+        button.classList.add("wrong");
+        allButtons.forEach(btn => {
+          if (btn.textContent === currentElement.name) {
+            btn.classList.add("correct");
+          }
+        });
+      }
+
+      // Show atomic number + name + symbol
+      infoEl.textContent = `💡 #${currentElement.number} – ${currentElement.name} (${currentElement.symbol})`;
+
+      // Next or end
+      if (currentQuestion < totalQuestions) {
+        nextBtn.style.display = "inline-block";
+      } else {
+        endGame();
+      }
+    }
+
+    // End game
+    function endGame() {
+      questionEl.textContent = "🎉 Round Complete!";
+      optionsEl.innerHTML = "";
+      nextBtn.style.display = "none";
+
+      const maxScore = 30;
+      const minScore = -30;
+      const range = maxScore - minScore;
+      const progress = (score - minScore) / range; // 0 to 1
+      const percentage = Math.round(progress * 100);
+
+      let message;
+      if (score >= 25) message = "🌟 Atomic Genius! You're unstoppable!";
+      else if (score >= 15) message = "🎉 Great job! You're mastering the table!";
+      else if (score >= 0) message = "👍 Good effort! Keep going!";
+      else message = "📚 Don't worry — every expert was once a beginner!";
+
+      feedbackEl.innerHTML = `🎯 Final Score: <strong>${score}</strong><br><small>${message}</small>`;
+      infoEl.textContent = `You learned 30 elements and their atomic numbers! Perfect = +30.`;
+
+      playAgainBtn.style.display = "inline-block";
+    }
+
+    // Shuffle array
+    function shuffleArray(array) {
+      for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+      }
+      return array;
+    }
+
+    // Event Listeners
+    nextBtn.addEventListener("click", () => {
+      nextBtn.style.display = "none";
+      currentQuestion++;
+      loadQuestion();
+    });
+
+    playAgainBtn.addEventListener("click", () => {
+      playAgainBtn.style.display = "none";
+      startGame();
+    });
+
+    // Start game
+    startGame();
+  </script>
+</body>
+</html>
